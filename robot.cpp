@@ -7,19 +7,17 @@
 #include <frc/drive/DifferentialDrive.h>
 #include <frc/motorcontrol/PWMSparkMax.h>
 #include <frc/motorcontrol/MotorControllerGroup.h>
+#include <wpi/sendable/SendableRegistry.h>
 
-/**
- * This is a demo program showing the use of the DifferentialDrive class.
- * Runs the motors with arcade steering.
- */
+
 class Robot : public frc::TimedRobot {
   frc::PWMSparkMax leftFrontMotor{0};
   frc::PWMSparkMax leftBackMotor{3};
-  frc::MotorControllerGroup leftMotors{leftFrontMotor, leftBackMotor};
+  frc::MotorControllerGroup leftMotors{leftFrontMotor, leftBackMotor}; // Groups left motors
 
   frc::PWMSparkMax rightFrontMotor{1};
   frc::PWMSparkMax rightBackMotor{4};
-  frc::MotorControllerGroup rightMotors{rightFrontMotor, rightBackMotor};
+  frc::MotorControllerGroup rightMotors{rightFrontMotor, rightBackMotor}; // Groups right motors
 
   frc::DifferentialDrive robotDrive{leftMotors, rightMotors};
     [&](double output) { leftMotors.Set(output); },
@@ -28,18 +26,15 @@ class Robot : public frc::TimedRobot {
 
  public:
   Robot() {
-    wpi::SendableRegistry::AddChild(&m_robotDrive, &m_leftMotors);
-    wpi::SendableRegistry::AddChild(&m_robotDrive, &m_rightMotors);
+    wpi::SendableRegistry::AddChild(&robotDrive, &leftMotors);
+    wpi::SendableRegistry::AddChild(&robotDrive, &rightMotors);
 
-    // We need to invert one side of the drivetrain so that positive voltages
-    // result in both sides moving forward. Depending on how your robot's
-    // gearbox is constructed, you might have to invert the left side instead.
-    m_rightMotors.SetInverted(true);
+
+    rightMotors.SetInverted(true); // Inverts right side motors
   }
 
   void TeleopPeriodic() override {
-    // Drive with arcade style
-    m_robotDrive.ArcadeDrive(-m_stick.GetY(), -m_stick.GetX());
+    robotDrive.ArcadeDrive(-m_stick.GetY(), -m_stick.GetX());
   }
 };
 
